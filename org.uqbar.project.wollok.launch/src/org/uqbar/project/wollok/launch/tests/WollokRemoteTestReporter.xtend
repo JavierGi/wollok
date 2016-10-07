@@ -31,14 +31,13 @@ class WollokRemoteTestReporter implements WollokTestsReporter {
 	@Inject
 	var WollokLauncherParameters parameters
 
-	var Client client
-	var callHandler = new CallHandler
-	var WollokRemoteUITestNotifier remoteTestNotifier
+	protected var WollokRemoteUITestNotifier remoteTestNotifier
 	val testsResult = new LinkedList<WollokResultTestDTO>
 
 	@Inject
 	def init() {
-		client = new Client("localhost", parameters.testPort, callHandler)
+		val callHandler = new CallHandler
+		val client = new Client("localhost", parameters.testPort, callHandler)
 		remoteTestNotifier = client.getGlobal(WollokRemoteUITestNotifier) as WollokRemoteUITestNotifier
 	}
 
