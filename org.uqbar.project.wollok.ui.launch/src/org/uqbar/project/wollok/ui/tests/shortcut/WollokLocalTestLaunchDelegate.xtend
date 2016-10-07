@@ -1,5 +1,6 @@
 package org.uqbar.project.wollok.ui.tests.shortcut
 
+import com.google.common.io.Files
 import com.google.inject.Inject
 import com.google.inject.Provider
 import java.io.File
@@ -23,7 +24,7 @@ import org.uqbar.project.wollok.ui.console.WollokReplConsole
 import org.uqbar.project.wollok.ui.tests.WollokTestResultView
 import org.uqbar.project.wollok.ui.tests.launch.WollokTestSetup
 import org.uqbar.project.wollok.wollokDsl.WFile
-
+import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.*
 import static extension org.uqbar.project.wollok.ui.launch.WollokLaunchConstants.*
 
 class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
@@ -49,9 +50,11 @@ class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
 		}
 
 		val interpreter = injector.getInstance(WollokInterpreter)
+		
 		//val evaluator = interpreter.evaluator as WollokLauncherInterpreterEvaluator
 		//val testReporter = evaluator.wollokTestsReporter as WollokLocalTestReporter
-		val resource = this.parseString(configuration.wollokFile)
+		val project = configuration.getAttribute(ATTR_PROJECT_NAME, "X")		
+		val resource = this.getResource(configuration.wollokFile, project)
 		interpreter.interpret(resource, true)
 
 		RunInUI.runInUI [
@@ -66,10 +69,9 @@ class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
 		]
 	}
 
-	def parseString(String testPath) {
+	def getResource(String testPath, String projectName) {
 		val resourceSet = resourceSetProvider.get()
 		//val resourceSet = injector.getInstance(XtextResourceSet)
-		val projectName = "prueba" // ver cómo lo saco
 		val root = ResourcesPlugin.workspace.root
 		
 		val File testFile = new File(root.locationURI.path + "/" + projectName + "/" + testPath)
@@ -81,8 +83,11 @@ class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
 		this.createClassPath(testFile, resourceSet)
 		val resource = resourceSet.getResource(URI.createURI(testFile.toURI.toString), false)
 		resourceSet.resources.add(resource)
-		resource.load(#{})
-		//new WollokChecker().validate(injector, resource)
+		
+		val testInput = Files.asByteSource(testFile).openStream
+		resource.load(testInput, null)
+		//resource.load(#{})
+		new WollokChecker().validate(injector, resource)
 
 		resource.contents.head as WFile
 	}
