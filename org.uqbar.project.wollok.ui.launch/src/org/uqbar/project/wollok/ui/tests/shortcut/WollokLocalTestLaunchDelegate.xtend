@@ -87,7 +87,14 @@ class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
 		val testInput = Files.asByteSource(testFile).openStream
 		resource.load(testInput, null)
 		//resource.load(#{})
-		new WollokChecker().validate(injector, resource)
+		//new WollokChecker().validate(injector, resource)
+		val issues = newArrayList
+		new WollokChecker().validate(
+							injector,
+							resource,
+							[issues.add(it)],
+							[]
+						)
 
 		resource.contents.head as WFile
 	}
