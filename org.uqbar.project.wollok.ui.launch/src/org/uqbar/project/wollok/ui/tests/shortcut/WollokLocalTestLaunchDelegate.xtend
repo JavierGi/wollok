@@ -2,13 +2,15 @@ package org.uqbar.project.wollok.ui.tests.shortcut
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import java.io.ByteArrayInputStream
 import java.io.File
+import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.runtime.CoreException
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.debug.core.ILaunch
 import org.eclipse.debug.core.ILaunchConfiguration
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.console.ConsolePlugin
 import org.eclipse.xtext.resource.IResourceFactory
@@ -20,6 +22,7 @@ import org.uqbar.project.wollok.ui.console.RunInUI
 import org.uqbar.project.wollok.ui.console.WollokReplConsole
 import org.uqbar.project.wollok.ui.tests.WollokTestResultView
 import org.uqbar.project.wollok.ui.tests.launch.WollokTestSetup
+import org.uqbar.project.wollok.wollokDsl.WFile
 
 import static extension org.uqbar.project.wollok.ui.launch.WollokLaunchConstants.*
 
@@ -57,15 +60,32 @@ class WollokLocalTestLaunchDelegate implements ILaunchConfigurationDelegate {
 
 	}
 
-	def parseString(String testPath) {
-		val programType = "wtest"
-		new ByteArrayInputStream(test.getBytes("UTF-8")).parse(programType)
-		
-		val testFile = new File("/home/fernando/workspace/wollok-dev/runtime-EclipseApplication/prueba/" + testPath)
-		val resourceSet = injector.getInstance(XtextResourceSet)
-		val checker = injector.getInstance(WollokChecker)
-		checker.parse(testFile)				
+	def createClassPath(File file, ResourceSet resourceSet) {
+		newArrayList => [
+			resourceSet.createResource(URI.createURI(file.toURI.toString))
+		]
 	}
 
+	def parseString(String testPath) {
+		val resourceSet = resourceSetProvider.get()
+		//val resourceSet = injector.getInstance(XtextResourceSet)
+		val projectName = "prueba" // ver cómo lo saco
+		val root = ResourcesPlugin.workspace.root
+		
+		val File testFile = new File(root.locationURI.path + "/" + projectName + "/" + testPath)
+		if (!testFile.exists) {
+			throw new RuntimeException("File " + testFile + " does not exist!")
+		}
+
+
+		this.createClassPath(testFile, resourceSet)
+		val resource = resourceSet.getResource(URI.createURI(testFile.toURI.toString), false)
+		resourceSet.resources.add(resource)
+		resource.load(#{})
+		//new WollokChecker().validate(injector, resource)
+
+		resource.contents.head as WFile
+	}
+ 
 
 }
