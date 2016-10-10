@@ -6,26 +6,27 @@ import org.eclipse.debug.core.ILaunch
 import org.eclipse.debug.core.ILaunchConfiguration
 import org.eclipse.ui.PlatformUI
 import org.uqbar.project.wollok.ui.console.RunInUI
-import org.uqbar.project.wollok.ui.launch.Activator
 import org.uqbar.project.wollok.ui.launch.shortcut.WollokLaunchDelegate
 import org.uqbar.project.wollok.ui.tests.WollokTestResultView
+import org.uqbar.project.wollok.ui.tests.model.WollokLocalTestReporter
 
-/**
- * @author tesonep
- */
-class WollokTestLaunchDelegate extends WollokLaunchDelegate {
-	
-	override launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		RunInUI.runInUI[ 
+class WollokLocalTestLaunchDelegate extends WollokLaunchDelegate {
+
+	override launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
+		IProgressMonitor monitor) throws CoreException {
+		RunInUI.runInUI [
 			PlatformUI.workbench.activeWorkbenchWindow.activePage.showView(WollokTestResultView.NAME)
 		]
 		super.launch(configuration, mode, launch, monitor)
 	}
-	
+
 	override configureLaunchParameters(ILaunchConfiguration config, int requestPort, int eventPort) {
+		println("Configurando ")
 		super.configureLaunchParameters(config, requestPort, eventPort) => [
 			tests = true
-			testPort = Activator.getDefault.wollokTestViewListeningPort
+			testPort = 0
+			testsReporter = WollokLocalTestReporter
 		]
 	}
+
 }

@@ -1,5 +1,7 @@
 package org.uqbar.project.wollok.launch
 
+import java.io.File
+import java.io.FileWriter
 import java.util.ArrayList
 import java.util.List
 import org.apache.commons.cli.CommandLine
@@ -7,9 +9,8 @@ import org.apache.commons.cli.GnuParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.eclipse.xtend.lib.annotations.Accessors
-import java.io.File
-import java.io.FileOutputStream
-import java.io.FileWriter
+import org.uqbar.project.wollok.launch.tests.DefaultWollokTestsReporter
+import org.uqbar.project.wollok.launch.tests.WollokTestsReporter
 
 /**
  * @author jfernandes
@@ -21,7 +22,7 @@ class WollokLauncherParameters {
 	@Accessors
 	Integer eventsPort = null
 	@Accessors
-	List<String> wollokFiles = new ArrayList();
+	List<String> wollokFiles = new ArrayList()
 	@Accessors
 	boolean hasRepl = false
 	@Accessors
@@ -30,6 +31,8 @@ class WollokLauncherParameters {
 	boolean jsonOutput = false
 	@Accessors
 	boolean tests = false
+	@Accessors
+	Class<? extends WollokTestsReporter> testsReporter = null
 	
 	def build() {
 		val sb = new StringBuilder
