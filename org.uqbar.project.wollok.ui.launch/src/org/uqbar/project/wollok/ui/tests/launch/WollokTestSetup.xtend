@@ -11,6 +11,7 @@ class WollokTestSetup extends WollokLauncherSetup {
 	}
 
 	override createInjector() {
-		return Guice.createInjector(new WollokTestModule(params), this);
+		return Guice.createInjector(new WollokTestModule(params), this)
 	}
+	
 }

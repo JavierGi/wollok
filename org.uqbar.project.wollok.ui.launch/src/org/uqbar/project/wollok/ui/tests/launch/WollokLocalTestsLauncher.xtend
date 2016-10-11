@@ -1,10 +1,8 @@
-package org.uqbar.project.wollok.launch.setup
+package org.uqbar.project.wollok.ui.tests.launch
 
-import com.google.common.io.Files
 import com.google.inject.Inject
 import com.google.inject.Provider
 import java.io.File
-import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.resource.IResourceFactory
@@ -13,8 +11,8 @@ import org.uqbar.project.wollok.interpreter.WollokInterpreter
 import org.uqbar.project.wollok.launch.WollokChecker
 import org.uqbar.project.wollok.launch.WollokLauncherInterpreterEvaluator
 import org.uqbar.project.wollok.launch.WollokLauncherParameters
+import org.uqbar.project.wollok.launch.tests.WollokTestsReporter
 import org.uqbar.project.wollok.wollokDsl.WFile
-import org.uqbar.project.wollok.launch.tests.WollokRemoteTestReporter
 
 class WollokLocalTestsLauncher {
 
@@ -25,16 +23,15 @@ class WollokLocalTestsLauncher {
 
 	@Inject
 	private IResourceFactory resourceFactory
-
-	val injector = new WollokLauncherSetup(parameters).createInjectorAndDoEMFRegistration => [
+	
+	val injector = new WollokTestSetup(parameters).createInjectorAndDoEMFRegistration => [
 		injectMembers(this)
 	]
 
-	def launch(String projectName, String wollokFile, WollokRemoteTestReporter testReporter) {
+	def launch(String projectName, String wollokFile) {
 		val interpreter = injector.getInstance(WollokInterpreter)
-		val evaluator = interpreter.evaluator as WollokLauncherInterpreterEvaluator
-		evaluator.wollokTestsReporter = testReporter
-		println(testReporter.toString)
+		//val evaluator = interpreter.evaluator as WollokLauncherInterpreterEvaluator
+		//evaluator.wollokTestsReporter = testReporter
 		val resource = this.getResource(wollokFile, projectName)
 		interpreter.interpret(resource, true)
 	}
@@ -47,18 +44,18 @@ class WollokLocalTestsLauncher {
 
 	def getResource(String testPath, String projectName) {
 		val resourceSet = resourceSetProvider.get()
-		// val resourceSet = injector.getInstance(XtextResourceSet)
-		val root = ResourcesPlugin.workspace.root
+		//val root = ResourcesPlugin.workspace.root
 
-		val File testFile = new File(root.locationURI.path + "/" + projectName + "/" + testPath)
-		if (!testFile.exists) {
-			throw new RuntimeException("File " + testFile + " does not exist!")
-		}
+		//val File testFile = new File(root.locationURI.path + "/" + projectName + "/" + testPath)
+		//if (!testFile.exists) {
+		//	throw new RuntimeException("File " + testFile + " does not exist!")
+		//}
 
-		this.createClassPath(testFile, resourceSet)
-		val resource = resourceSet.getResource(URI.createURI(testFile.toURI.toString), false)
-		resourceSet.resources.add(resource)
+		//this.createClassPath(testFile, resourceSet)
 		//val testInput = Files.asByteSource(testFile).openStream
+		//val resource = resourceFactory.createResource(resourceSet.computeUnusedUri("wtest"))
+		val resource = resourceFactory.createResource(URI.createURI("platform:/resource/" + projectName + "/" + testPath))
+		resourceSet.resources.add(resource)
 		//resource.load(testInput, null)
 		resource.load(#{})
 		
@@ -71,6 +68,16 @@ class WollokLocalTestsLauncher {
 		)
 
 		resource.contents.head as WFile
+	}
+	
+	def URI computeUnusedUri(ResourceSet resourceSet, String fileExtension) {
+		val String name = "__synthetic"
+		for (var i = 0; i < Integer.MAX_VALUE; i++) {
+			val syntheticUri = URI.createURI(name + i + "." + fileExtension)
+			if (resourceSet.getResource(syntheticUri, false) == null)
+				return syntheticUri
+		}
+		throw new IllegalStateException()
 	}
 
 }

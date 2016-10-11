@@ -20,6 +20,7 @@ class MapBasedWollokGlobalScopeCache implements WollokGlobalScopeCache {
 		var cacheContent = cache.get(uriString) as MapBasedCacheContent
 		
 		if(cacheContent == null || cacheContent.mismatch(imports)){
+			println("Loading " + uriString)
 			cacheContent = new MapBasedCacheContent(uri, imports, ifAbsentBlock.apply)
 			cache.put(uriString, cacheContent)
 		}

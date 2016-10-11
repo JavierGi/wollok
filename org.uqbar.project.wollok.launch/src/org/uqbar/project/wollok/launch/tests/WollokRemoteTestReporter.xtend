@@ -31,7 +31,7 @@ class WollokRemoteTestReporter implements WollokTestsReporter {
 	@Inject
 	var WollokLauncherParameters parameters
 
-	protected var WollokRemoteUITestNotifier remoteTestNotifier
+	var WollokRemoteUITestNotifier remoteTestNotifier
 	val testsResult = new LinkedList<WollokResultTestDTO>
 
 	@Inject

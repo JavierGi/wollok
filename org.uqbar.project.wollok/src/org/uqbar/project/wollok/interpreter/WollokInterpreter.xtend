@@ -21,8 +21,6 @@ import org.uqbar.project.wollok.interpreter.stack.ObservableStack
 import org.uqbar.project.wollok.interpreter.stack.ReturnValueException
 import org.uqbar.project.wollok.interpreter.stack.XStackFrame
 
-import static org.uqbar.project.wollok.sdk.WollokDSK.*
-
 /**
  * XInterpreter impl for Wollok language.
  * Control's the execution flow and stack.
